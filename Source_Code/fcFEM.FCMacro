@@ -1,0 +1,104 @@
+# ***************************************************************************
+# *                                                                         *
+# *   Copyright (c) 2019 - Harry van Langen <hvlanalysis@icloud.com>        *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
+# *   as published by the Free Software Foundation; either version 2 of     *
+# *   the License, or (at your option) any later version.                   *
+# *   for detail see the LICENCE text file.                                 *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Library General Public License for more details.                  *
+# *                                                                         *
+# *   You should have received a copy of the GNU Library General Public     *
+# *   License along with this program; if not, write to the Free Software   *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+# *   USA                                                                   *
+# *                                                                         *
+# ***************************************************************************
+
+import sys
+import time
+
+if 'femTools' in sys.modules.keys():
+    del(sys.modules['femTools'])
+
+import femTools as ft
+
+fmt = "{0:10.3f}"
+
+timer = [["extract information from FreeCAD objects....................... " + fmt + " seconds", [ ]],
+         ["prepare finite element input................................... " + fmt + " seconds", [ ]],
+         ["calculate the global stiffness matrix and global load vector... " + fmt + " seconds", [ ]],
+         ["solve the global siffness matrix equation...................... " + fmt + " seconds", [ ]],
+         ["calculate stresses from displacements.......................... " + fmt + " seconds", [ ]],
+         ["paste results in the FEM result object......................... " + fmt + " seconds", [ ]],
+         ["calculate internal load vector................................. " + fmt + " seconds", [ ]]]
+
+# material input values - TODO: merge with FEM WB input dialogues
+gravity = -0.0e-5   # specific gravity acting in z-direction [N/mm3]
+sig_yield = 100.0    # yield stress [MPa] for volume elements (von Mises material)
+shr_yield = 100.0   # yield stress [MPa] for interface elements (Coulomb material)
+kn = 1.0            # interface elastic normal stiffness factor (0.0 < kn <1.0)
+ks = 0.0            # interface elastic shear stiffness factor (0.0 < ks <1.0)
+
+# control input values - TODO: merge with FEM WB input dialogues
+out_disp = -1000        # +n: output total discplacment at step n ; -n: output incremental discplacement at step n (if n>last step then n=last step)
+nstep=10            # number of load steps per run (default = 10)
+iterat_max=20       # max number of iterations per step - this triggers a scale-down and restart
+error_max=1.0e-03   # convergence tolerance (default = 1.0e-03)
+relax = 1.2         # numerical over-relaxation (1.0 < relax < 1.5; default = 1.2)
+scale_re = 2.0      # scale factor for re-start (default = 2.0)
+scale_up = 1.2      # scale up for fast convergence (default = 1.2)
+scale_dn = 1.2      # scale down for slow convergence (default = 1.2)
+
+
+# extract information from FreeCAD objects
+t0=time.time()
+doc, mesh, analysis = ft.setUpAnalysis()
+t1=time.time()
+timer[0][1]=t1-t0
+
+# prepare finite element input
+t0=time.time()
+elNodes, noCoord, dispFaces, loadFaces, elMat, interface_elements, noce = ft.setUpInput(doc, mesh, analysis)
+t1=time.time()
+timer[1][1]=t1-t0
+
+# calculate the global stiffness matrix and global load vector
+t0=time.time()
+globalStiffnessMatrix, globalLoadVector, kmax = ft.calcGSM(elNodes, noCoord, elMat, loadFaces, interface_elements, gravity, kn, ks)
+t1=time.time()
+timer[2][1]=t1-t0
+
+# solve the global siffness matrix equation
+t0=time.time()
+displacements, stresses, tractions = ft.calcDisp (elNodes, noCoord, dispFaces, elMat, interface_elements, kmax, globalStiffnessMatrix, globalLoadVector,
+                                                    nstep, iterat_max, error_max, relax, scale_re, scale_up, scale_dn, sig_yield, shr_yield, kn, ks, out_disp)
+t1=time.time()
+timer[3][1]=t1-t0
+
+# map stresses to nodal points
+t0=time.time()
+tet10stress, contactpressurevector, contactpressurevalue, contactshearvector = ft.mapStresses(elNodes, noCoord, interface_elements, displacements, stresses, tractions, noce)
+t1=time.time()
+timer[4][1]=t1-t0
+
+# paste results in the FEM result object
+t0=time.time()
+resInt, resVol = ft.pasteResults(doc, elNodes, noCoord, interface_elements, displacements, tet10stress, contactpressurevector, contactpressurevalue, contactshearvector)
+t1=time.time()
+timer[5][1]=t1-t0
+
+# Calculate internal loads and residual loads
+t0=time.time()
+#qin, resload = ft.internalLoads(elNodes, noCoord, elMat, loadFaces, interface_elements)
+t1=time.time()
+timer[6][1]=t1-t0
+
+print
+for entry in timer:
+    print(entry[0].format(entry[1]))
