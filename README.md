@@ -21,7 +21,7 @@ Please refer to source code for in-line comments and to the FreeCAD forum (https
 <img src="https://user-images.githubusercontent.com/35259498/55271897-c25d5c00-52b4-11e9-986d-76669f87216d.jpg" height="200"/> <img src="https://user-images.githubusercontent.com/35259498/55271896-c1c4c580-52b4-11e9-96b6-f5846bb35fb1.png" height="200"/>
 
 ### TODO
-Optimal use of LAPACK and BLAS libraries to increase speed of the incremental-iterative colver  
+Optimal use of LAPACK and BLAS libraries to increase speed of the incremental-iterative solver  
 Addition of beam and shell elements  
 Linear buckling and initial imperfections for non-liner buckling  
 Loading stages  
