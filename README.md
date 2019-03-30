@@ -10,7 +10,8 @@ fcFEM is a general finite element framework for 3D deformation analysis, current
 
 ### Installation and running
 Install files fcFEM.FCMacro and femTools.py in the .FreeCAD/Macro folder on your machine  
-Open with FreeCAD macro edititor
+Open with FreeCAD macro edititor  
+fcFEM requires FreeCAD version 0.17 or higher
 
 <img src="https://user-images.githubusercontent.com/35259498/55271895-c1c4c580-52b4-11e9-9427-e643a688b36d.jpg" width="450"/>
 
