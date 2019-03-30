@@ -23,7 +23,7 @@ Please refer to source code for in-line comments and to the FreeCAD forum (https
 ### TODO
 Optimal use of LAPACK and BLAS libraries to increase speed of the incremental-iterative solver  
 Addition of beam and shell elements  
-Linear buckling and initial imperfections for non-liner buckling  
+Linear buckling and initial imperfections for non-linear buckling  
 Loading stages  
 Geometric non-linearity  
 Advanced material modelling  
