@@ -12,9 +12,9 @@ Open with FreeCAD macro edititor
 Please refer to source code for in-line comments and to the FreeCAD forum (https://forum.freecadweb.org/viewforum.php?f=18)
 
 ### TODO
-Optimal use of LAPACK and BLAS libraries to increase speed of the incremntal-iterative colver  
+Optimal use of LAPACK and BLAS libraries to increase speed of the incremental-iterative colver  
 Addition of beam and shell elements  
-Linear buckling and inital imperfections for non-liner buckling  
+Linear buckling and initial imperfections for non-liner buckling  
 Loading stages  
 Geometric non-linearity  
 Advanced material modelling  
